@@ -1,11 +1,16 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {createUserModel} from "../Models/usersModel.js";
-const User = createUserModel // Correct import statement
+// At the top of your middleware file
+import { createUserModel } from "../Models/usersModel.js";
+const User = createUserModel; // Assuming sequelize and DataTypes are imported
+
+import { db } from "../Models/index.js";
+
+const Users = db.Users;
+
 
 export async function verifyToken(req, res, next) {
   const token = req.headers["authorization"];
-
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
@@ -45,20 +50,24 @@ export async function verifyAdmin(req, res, next) {
 
 export async function verifyUser(req, res, next) {
   try {
-    const token = req.headers["authorization"];
-
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-
-    const decoded = jwt.verify(token.split(" ")[1], process.env.SECRET_STRING);
-    const user = await User.findByPk(   decoded.id  );
-    if (!user) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    next();
+     const headerInput = req.headers['authorization'];
+     const token = headerInput && headerInput.split(' ')[1];
+     if (!token) {
+       return res.status(401).json({ message: "No token provided" });
+     }
+ 
+     const decoded = jwt.verify(token, process.env.SECRET_STRING);
+     const user = await Users.findByPk(decoded.id);
+     if (!user) {
+       return res.status(403).json({ message: "Unauthorized" });
+     }
+ 
+     // Attach the user ID to the request object
+     req.userId = user.id;
+ 
+     next();
   } catch (error) {
-    return res.status(403).json({ message: error.message });
+     return res.status(403).json({ message: error.message });
   }
-}
+ };
+ 

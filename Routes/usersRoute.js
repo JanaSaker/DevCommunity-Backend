@@ -8,7 +8,7 @@ import {
   login,
 } from '../Controllers/usersController.js';
 import upload from '../middleware/multer.js';
-import { verifyAdmin, verifyUser } from '../middleware/auth.js';
+import { verifyAdmin, verifyUser, verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 

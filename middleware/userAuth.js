@@ -15,7 +15,7 @@ export const authorizeAccess = (model) => async (req, res, next) => {
       if (!item) {
         return res.status(404).json({ error: `${model.name} not found` });
       }
-  
+
       // Check if the authenticated user is the owner of the model item
       if (item.userId !== req.user.id) {
         return res.status(403).json({ error: 'Forbidden' });

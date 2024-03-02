@@ -3,13 +3,17 @@ import { db } from "../Models/index.js";
 const Job = db.Jobs;
 const KeyLang = db.KeyLangs;
 const LangJob = db.LangJobs;
+const User = db.Users;
 
 // Create a new job
 export const createJobs = async (req, res) => {
     try {
         const { title, company_name, company_location, availability, place, description, level_required, status, submission_date, keylangs } = req.body;
+        const userId = req.userId;
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
 
-        // Create the job
         const job = await Job.create({
             title,
             company_name,
@@ -19,7 +23,8 @@ export const createJobs = async (req, res) => {
             description,
             level_required,
             status,
-            submission_date
+            submission_date,
+            userId
         });
 
         // Extract IDs from the keylangs array
