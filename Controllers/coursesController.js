@@ -8,7 +8,10 @@ const LangCourse = db.LangCourses;
 export const createCourse = async (req, res) => {
     try {
         const { title, subtitle, description, status, submission_date, URL, keylangs } = req.body;
-
+        const userId = req.userId;
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
         // Create the course
         const course = await Course.create({
             title,
@@ -16,7 +19,9 @@ export const createCourse = async (req, res) => {
             description,
             status,
             submission_date,
-            URL
+            URL,
+            userId
+
         });
 
         // Extract IDs from the keylangs array

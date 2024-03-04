@@ -105,7 +105,11 @@ const login = async (req, res, next) => {
       process.env.SECRET_STRING,
       { expiresIn: process.env.LOGIN_EXPIRES }
     );
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({
+      status: "Login successfu",
+      token,
+      data: user,
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).send(error.message);

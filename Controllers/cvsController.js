@@ -1,127 +1,3 @@
-// import { db } from "../Models/index.js";
-
-// const CV = db.CVs;
-// const KeyLang = db.KeyLangs;
-// const LangCV = db.LangCVs;
-
-// // Create a new cv
-// export const createCVs = async (req, res) => {
-//     try {
-//         const { title, company_name, company_location, availability,place, description, level_required, status,submission_date,language } = req.body;
-
-//         // Create the cv
-//         const cv = await CV.create({
-//             title,
-//             company_name,
-//             company_location,
-//             availability,
-//             place,
-//             description,
-//             level_required,
-//             status,
-//             submission_date
-//         });
-
-//         // Associate language with the cv
-//         if (language && language.length > 0) {
-//             await Promise.all(language.map(async (langId) => {
-//                 await LangCV.create({
-//                     cvId: cv.id,
-//                     keyLangId: langId
-//                 });
-//             }));
-//         }
-
-//         res.status(201).json({ cv });
-//     } catch (error) {
-//         console.error("Error creating cv:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// };
-
-// // Get all cvs
-// export const getCVs = async (req, res) => {
-//     try {
-//         const cvs = await CV.findAll({ include: KeyLang });
-//         res.status(200).json({ cvs });
-//     } catch (error) {
-//         console.error("Error fetching cvs:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// };
-
-// // Update a cv
-// export const updateCV = async (req, res) => {
-//     try {
-//         const cvId = req.params.id;
-//         const { title, company_name, company_location, availability,place, description, level_required, status,submission_date,language } = req.body;
-
-//         // Find the cv
-//         const cv = await CV.findByPk(cvId);
-
-//         if (!cv) {
-//             return res.status(404).json({ error: "CV not found" });
-//         }
-
-//         // Update cv attributes
-//         await cv.update({
-            // title,
-            // company_name,
-            // company_location,
-            // availability,
-            // place,
-            // description,
-            // level_required,
-            // status,
-            // submission_date
-//         });
-
-//         // Update associated language
-//         if (language && language.length > 0) {
-//             // Remove existing associations
-//             await LangCV.destroy({ where: { cvId } });
-
-//             // Create new associations
-//             await Promise.all(language.map(async (langId) => {
-//                 await LangCV.create({
-//                     cvId,
-//                     keyLangId: langId
-//                 });
-//             }));
-//         }
-
-//         res.status(200).json({ cv });
-//     } catch (error) {
-//         console.error("Error updating cv:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// };
-
-// // Delete a cv
-// export const deleteCV = async (req, res) => {
-//     try {
-//         const cvId = req.params.id;
-
-//         // Find the cv
-//         const cv = await CV.findByPk(cvId);
-
-//         if (!cv) {
-//             return res.status(404).json({ error: "CV not found" });
-//         }
-
-//         // Delete associated language associations
-//         await LangCV.destroy({ where: { cvId } });
-
-//         // Delete the cv
-//         await cv.destroy();
-
-//         res.status(204).send();
-//     } catch (error) {
-//         console.error("Error deleting cv:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// };
-
 import { db } from "../Models/index.js";
 
 const CV = db.CVs;
@@ -132,7 +8,10 @@ export const createCVs = async (req, res) => {
     try {
         const { title, description, status, submission_date, keylangs } = req.body;
         const file = req.file.filename; // Assuming file upload is handled correctly
-
+        const userId = req.userId;
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
         // Parse keylangs if it's a JSON string
         let parsedKeylangs;
         try {
@@ -147,7 +26,8 @@ export const createCVs = async (req, res) => {
             description,
             file,
             status,
-            submission_date
+            submission_date,
+            userId
         });
 
         // Extract IDs from the parsed keylangs array

@@ -7,7 +7,7 @@ import { verifyToken, verifyUser } from '../middleware/auth.js';
 const router = express.Router();
 
 // Route to create a new CV
-router.post('/cvs', verifyUser, upload.single("file"),
+router.post('/cvs', verifyUser,upload.single("file"),
 createCVs);
 
 // Route to get all CVs
