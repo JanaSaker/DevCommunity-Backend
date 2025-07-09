@@ -38,9 +38,10 @@ app.get("/", (req, res) => {
  res.json({ message: 'hello from api' });
 });
 
-app.listen(process.env.PORT, () => {
- console.log("server listening on port", process.env.PORT);
-});
+app.listen(4000, () => {
+    console.log("Server running on port 4000");
+  });
+  
 
 // Routes
 app.use('/api/', courseRouter);

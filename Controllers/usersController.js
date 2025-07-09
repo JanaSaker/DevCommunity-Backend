@@ -1,22 +1,32 @@
 import { db } from "../Models/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Op } from "sequelize"; 
 
 const User = db.Users;
 
 const addUser = async (req, res) => {
   try {
-    const { username, email, password,role } = req.body;
-    const profile = req.file.filename; // Multer saves uploaded file information in req.file
-console.log(req.body)
-    // Check if required fields are provided
+    const { username, email, password, role } = req.body;
+    const profile = req.file?.filename;
+
+    console.log(req.body);
+
     if (!username || !email || !password || !profile) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    const existingUser = await User.findOne({ where: { username: username } });
+
+    // Check for duplicate username or email
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ username }, { email }],
+      },
+    });
+
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
@@ -26,9 +36,14 @@ console.log(req.body)
       profile,
       role,
     });
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_STRING, {
-      expiresIn: process.env.LOGIN_EXPIRES,
-    });
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.SECRET_STRING,
+      {
+        expiresIn: process.env.LOGIN_EXPIRES,
+      }
+    );
 
     res.status(200).json({
       status: "success",
@@ -83,13 +98,23 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
+
+    // Check if user exists
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete the user
     await User.destroy({ where: { id } });
-    res.status(200).send("User deleted");
+
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);
-    res.status(500).send(error.message);
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 const login = async (req, res, next) => {
   try {

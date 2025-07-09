@@ -12,9 +12,13 @@ import { createInsightModel } from "./insightsModel.js"; // Alias one of the cre
 import pg from "pg";
 
 const sequelize = new Sequelize(
-    "postgres://postgres:eZmhbpPnm7Sb2U1D@rhxpeecuigvrqiuybgwf.db.eu-central-1.nhost.run:5432/rhxpeecuigvrqiuybgwf",
+    dbConfig.DB,
+    dbConfig.USER,
+    dbConfig.PASSWORD,
     {
-      dialectModule: pg,
+        host: dbConfig.HOST,
+        dialect: dbConfig.dialect,
+        operatorsAliases: false,
     }
 );
 
